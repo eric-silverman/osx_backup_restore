@@ -1,0 +1,40 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor and IDE settings
+.vscode/
+.idea/
+.cursor/
+*.swp
+*~
+*.tmp
+*.bak
+.project
+.classpath
+.settings/
+
+# Tooling
+specstory*
+
+# Dependencies and builds
+node_modules/
+dist/
+build/
+coverage/
+
+# Logs and environment
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+.env
+.env.*
