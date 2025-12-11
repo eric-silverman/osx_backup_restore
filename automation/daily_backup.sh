@@ -10,7 +10,7 @@ BACKUP_ROOT="${BACKUP_ROOT:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/B
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_OUT="/tmp/daily_backup.out"
 LOG_ERR="/tmp/daily_backup.err"
-MIN_INTERVAL_SECONDS=$((48 * 3600))
+MIN_INTERVAL_SECONDS=$((24 * 3600))
 LAST_RUN_FILE="$BACKUP_ROOT/.last_backup_timestamp"
 
 # Truncate launchd log files at start so each run is fresh (launchd appends by default).
@@ -43,7 +43,7 @@ notify() {
 
 mkdir -p "$BACKUP_ROOT"
 
-# Skip the run if the last successful backup finished less than 48 hours ago.
+# Skip the run if the last successful backup finished less than 24 hours ago.
 now_epoch=$(date +%s)
 if [ -f "$LAST_RUN_FILE" ]; then
   last_run_epoch=$(cat "$LAST_RUN_FILE" 2>/dev/null || true)
@@ -51,7 +51,7 @@ if [ -f "$LAST_RUN_FILE" ]; then
     elapsed=$((now_epoch - last_run_epoch))
     if [ "$elapsed" -lt "$MIN_INTERVAL_SECONDS" ]; then
       hours=$((elapsed / 3600))
-      message="Last backup finished ${hours}h ago; skipping to keep an every-other-day cadence."
+      message="Last backup finished ${hours}h ago; skipping to keep a daily cadence."
       echo "$message" >> "$LOG_OUT"
       notify "$message" "Daily Backup"
       exit 0

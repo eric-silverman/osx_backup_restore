@@ -548,9 +548,13 @@ TAR_BIN="tar"
 TAR_PROGRESS_OPTS=()
 if command -v gtar >/dev/null 2>&1; then
   TAR_BIN="$(command -v gtar)"
-  # Checkpoint every ~5000 files; prints a single-line carriage-returned status.
-  TAR_PROGRESS_OPTS=(--checkpoint=5000 --checkpoint-action=printf="   [tar] %u files archived\r")
-  echo "ℹ️  Using gtar with periodic tar progress."
+  if "$TAR_BIN" --checkpoint=1 --checkpoint-action=ttyout="tar progress probe" --version >/dev/null 2>&1; then
+    # Checkpoint every ~5000 files; prints a single-line carriage-returned status.
+    TAR_PROGRESS_OPTS=(--checkpoint=5000 --checkpoint-action=ttyout="   [tar] %u files archived\r")
+    echo "ℹ️  Using gtar with periodic tar progress."
+  else
+    echo "ℹ️  gtar found but checkpoint progress flags not supported; using gtar without progress output."
+  fi
 else
   echo "ℹ️  Using system tar (no progress checkpoints available)."
 fi

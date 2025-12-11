@@ -83,9 +83,9 @@ Logging:
 - The script pre-auths `sudo` and keeps it alive to avoid mid-run prompts.
 - Each backup includes `backup_summary.txt` inside the root folder/tar/zip listing which sections were captured and their paths.
 
-## Running Every Other Day via `launchd` (with sudo inside the script, not as root)
+## Running Daily via `launchd` (with sudo inside the script, not as root)
 - Install the plist: copy `automation/com.eric.dailybackup.plist` to `~/Library/LaunchAgents/` and edit the `ProgramArguments` path so it points to your clone (no sudo wrapper; the agent runs as your user).
-- The LaunchAgent triggers at 15:15 daily, but the script skips a run if the last backup finished within the past 48 hours, so you effectively get one backup every other day.
+- The LaunchAgent triggers at 15:15 daily and skips a run only if the last backup finished within the past 24 hours, so you get one backup per day.
 - Allow non-interactive sudo for the few commands the scripts invoke: add a sudoers drop-in with `sudo visudo -f /etc/sudoers.d/osx_backup_restore` containing:
   ```
   Cmnd_Alias OSX_BACKUP_CMDS=/opt/homebrew/bin/rsync,/usr/bin/rsync,/Users/eric/Dropbox/Development\\ Projects/osx_backup_restore/automation/daily_backup.sh,/Users/eric/Dropbox/Development\\ Projects/osx_backup_restore/backup_mac.sh
@@ -95,6 +95,7 @@ Logging:
 - Grant Full Disk Access to the `rsync` binary that will run (and to the shell if you prefer) so launchd does not prompt each time it touches Documents/Desktop/Mail. In System Settings → Privacy & Security → Full Disk Access, add `/usr/bin/rsync` and, if you use Homebrew’s, `/opt/homebrew/bin/rsync`. If you run the scripts with a custom shell (e.g., `/bin/bash` or `/opt/homebrew/bin/bash`), add that binary too. This must be done once per binary path; launchd inherits the allowance.
 - Load the agent with `launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.osxbackup.daily.plist` then `launchctl kickstart -k gui/$UID/com.osxbackup.daily` to test. Confirm `sudo -n /Users/eric/Dropbox/Development\ Projects/osx_backup_restore/automation/daily_backup.sh` works with no prompt before relying on the agent. Because the LaunchAgent runs as your user, Homebrew commands stay non-root and won’t trigger the “running Homebrew as root” error.
 - After editing the plist, run `./automation/update_launch_agent.sh` to copy it into `~/Library/LaunchAgents/` and reload/kickstart the agent automatically.
+- Daily runs keep only the five most recent `System_Backup_*.tgz` files in your backup destination to conserve space.
 
 ## Verify a Backup
 - Every run writes `backup_summary.txt` inside `System_Backup_<timestamp>/`.
