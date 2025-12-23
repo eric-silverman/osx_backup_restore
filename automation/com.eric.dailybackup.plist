@@ -17,7 +17,7 @@
     <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>
 
-  <!-- Trigger daily at 15:15 (3:15 PM); the script skips if the last run was <24h ago to avoid duplicate same-day runs. -->
+  <!-- Trigger daily at 15:15 (3:15 PM); the script skips if a backup already completed today to avoid duplicates. -->
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key><integer>15</integer>

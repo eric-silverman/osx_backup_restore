@@ -2,7 +2,7 @@
 
 This repo’s backup flow is meant to run non-interactively via the LaunchAgent in `automation/com.eric.dailybackup.plist`. Use this guide when installing, updating, or troubleshooting that agent.
 
-- **Schedule & cadence**: LaunchAgent label `com.osxbackup.daily` runs daily at 15:15, but `automation/daily_backup.sh` skips a run if the last successful backup finished <48h ago (keeps every-other-day cadence).
+- **Schedule & cadence**: LaunchAgent label `com.osxbackup.daily` runs daily at 15:15, but `automation/daily_backup.sh` skips a run if a backup already completed today (keeps one backup per day).
 - **Program path**: `ProgramArguments` call `/bin/bash` with `automation/daily_backup.sh`. Update the plist path if you move the repo, then run `./automation/update_launch_agent.sh`.
 - **Environment**: PATH set in the plist to include Homebrew. Overrideable vars: `BACKUP_ROOT` (default `~/Library/Mobile Documents/com~apple~CloudDocs/Backups`), `STAGING_ROOT` (default `${TMPDIR}/mac_backup_staging`), `STAGING_RETENTION_DAYS` (default 3). Agent runs in the user session, not as root.
 - **Outputs**: Backups staged at `$STAGING_ROOT/System_Backup_<timestamp>` then archived to `$BACKUP_ROOT/System_Backup_<timestamp>.tgz` with `--clean` to delete the staging folder. Only the archive is kept; staging is removed on success. After completion, only the 5 most recent archives are retained in `BACKUP_ROOT`. Logs now include staged folder size and final tar size to help track growth.
@@ -26,7 +26,7 @@ This repo’s backup flow is meant to run non-interactively via the LaunchAgent 
 
 ## Troubleshooting (LaunchAgent context)
 - **Cleanup failures**: If `--clean` cannot delete the staging folder non-interactively, ensure sudo NOPASSWD is configured for `chflags`, `chmod`, and `rm` on the staging path. Stuck path is usually at `$STAGING_ROOT/System_Backup_<timestamp>`.
-- **Skipped runs**: See `/tmp/daily_backup.out` for the “Last backup finished … ago; skipping” message (means last run <48h).
+- **Skipped runs**: See `/tmp/daily_backup.out` for the “Backup already completed on …; skipping” message (means a backup already ran today).
 - **Permissions errors**: Check Full Disk Access and sudoers; the agent cannot prompt for passwords.
 - **Notifications missing**: Ensure `osascript` works in the user session; otherwise, messages fall back to the console user via `launchctl asuser`.
 

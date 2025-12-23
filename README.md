@@ -85,7 +85,7 @@ Logging:
 
 ## Running Daily via `launchd` (with sudo inside the script, not as root)
 - Install the plist: copy `automation/com.eric.dailybackup.plist` to `~/Library/LaunchAgents/` and edit the `ProgramArguments` path so it points to your clone (no sudo wrapper; the agent runs as your user).
-- The LaunchAgent triggers at 15:15 daily and skips a run only if the last backup finished within the past 24 hours, so you get one backup per day.
+- The LaunchAgent triggers at 15:15 daily and skips a run if a backup already completed today, so you get one backup per day.
 - Allow non-interactive sudo for the few commands the scripts invoke: add a sudoers drop-in with `sudo visudo -f /etc/sudoers.d/osx_backup_restore` containing:
   ```
   Cmnd_Alias OSX_BACKUP_CMDS=/opt/homebrew/bin/rsync,/usr/bin/rsync,/Users/eric/Dropbox/Development\\ Projects/osx_backup_restore/automation/daily_backup.sh,/Users/eric/Dropbox/Development\\ Projects/osx_backup_restore/backup_mac.sh
