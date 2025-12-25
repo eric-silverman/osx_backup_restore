@@ -67,17 +67,20 @@ BACKUP_ROOT="$BACKUP_ROOT" /bin/bash "$SCRIPT_DIR/backup_mac.sh" tar --clean
 # Keep only the 10 most recent backups.
 cd "$BACKUP_ROOT"
 echo "🧹 Pruning backups in $BACKUP_ROOT (keep 10)..."
-total_backups=$(ls -1 System_Backup_*.tgz 2>/dev/null | wc -l | tr -d ' ')
-if [ "$total_backups" -eq 0 ]; then
+shopt -s nullglob
+backups=(System_Backup_*.tgz System_Backup_*.tgz.icloud)
+if [ ${#backups[@]} -eq 0 ]; then
   echo "   ℹ️  No backups matched System_Backup_*.tgz; skipping prune."
 else
+  mapfile -t sorted_backups < <(ls -1t -- "${backups[@]}")
+  total_backups=${#sorted_backups[@]}
   echo "   📦 Found $total_backups backups."
-  prune_list=$(ls -1t System_Backup_*.tgz 2>/dev/null | tail -n +11 || true)
-  if [ -n "$prune_list" ]; then
-    prune_count=$(printf '%s\n' "$prune_list" | wc -l | tr -d ' ')
+  if [ "$total_backups" -gt 10 ]; then
+    prune_list=("${sorted_backups[@]:10}")
+    prune_count=${#prune_list[@]}
     echo "   🗑️  Pruning $prune_count backups:"
-    printf '%s\n' "$prune_list"
-    printf '%s\n' "$prune_list" | xargs rm --
+    printf '%s\n' "${prune_list[@]}"
+    rm -- "${prune_list[@]}"
   else
     echo "   ✅ Nothing to prune."
   fi
